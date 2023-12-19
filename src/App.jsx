@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Vefify from "./Vefify";
 
 let table = [
   ["", "", ""],
@@ -30,6 +31,17 @@ function App() {
       let altoCelda = alto / 3;
 
       eventTurnRobot(ctx, anchoCelda, altoCelda);
+      let win = Vefify(table);
+      if(win != null){
+        if (win === "ROBOT") {
+          alert("Te gano la maquina!!!")
+        }else if(win === "PLAYER"){
+          alert("Ganaste!!!")
+        }else{
+          alert("EMPATE");
+        }
+        setTurn("NOTHING");
+      }
     }
 
   },[turn])
@@ -91,23 +103,23 @@ function App() {
 
   const eventTurnRobot = (ctx, anchoCelda, altoCelda) => {
     if (turn === "ROBOT") {
-      let mov = null;
+      let mov = { i: -1, j: -1 }; 
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
           if (table[i][j] === '') {
-            mov = { i, j }; // Corregir aquí
+            mov = { i, j };
           }
         }
       }
   
-      if (mov !== null) {
+      if (mov.i !== -1 && mov.j !== -1) { // Corregir aquí
         table[mov.i][mov.j] = "ROBOT";
         drawGame(ctx, anchoCelda, altoCelda);
         setTurn("PLAYER");
       }
-      
     }
   }
+  
 
   const eventDrawTable = (e) => {
     if (turn === "PLAYER") {
@@ -127,6 +139,7 @@ function App() {
         table[i][j] = "PLAYER";
         drawGame(ctx, anchoCelda, altoCelda)
         setTurn("ROBOT");
+        Vefify(table)
       }
     }
   }
