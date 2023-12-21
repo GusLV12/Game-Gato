@@ -9,6 +9,7 @@ let table = [
 
 function App() {
   const [turn, setTurn] = useState("PLAYER");
+  const [gano, setGano] = useState("");
 
   useEffect(() => {
     const canvas = document.querySelector("canvas");
@@ -22,31 +23,19 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if(turn === "ROBOT"){
-      const canvas = document.querySelector('canvas');
-      const ctx = canvas.getContext('2d');
+    if (turn === "ROBOT") {
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
       let ancho = canvas.width;
       let alto = canvas.height;
       let anchoCelda = ancho / 3;
       let altoCelda = alto / 3;
-
+  
       eventTurnRobot(ctx, anchoCelda, altoCelda);
-      let win = Vefify(table);
-      if(win != null){
-        if (win === "ROBOT") {
-          alert("Te gano la maquina!!!")
-        }else if(win === "PLAYER"){
-          alert("Ganaste!!!")
-        }else{
-          alert("EMPATE");
-        }
-        setTurn("NOTHING");
-      }
+      verificadorGanador(); // Corregir aquí
     }
-
-  },[turn])
-
-
+  }, [turn]);
+  
   const drawLine = (ctx, x1, y1, x2, y2) => {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -100,31 +89,29 @@ function App() {
     }
   };
 
-
   const eventTurnRobot = (ctx, anchoCelda, altoCelda) => {
     if (turn === "ROBOT") {
-      let mov = { i: -1, j: -1 }; 
+      let mov = { i: -1, j: -1 };
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          if (table[i][j] === '') {
+          if (table[i][j] === "") {
             mov = { i, j };
           }
         }
       }
   
-      if (mov.i !== -1 && mov.j !== -1) { // Corregir aquí
+      if (mov.i !== -1 && mov.j !== -1) {
         table[mov.i][mov.j] = "ROBOT";
         drawGame(ctx, anchoCelda, altoCelda);
         setTurn("PLAYER");
       }
     }
-  }
-  
+  };
 
   const eventDrawTable = (e) => {
     if (turn === "PLAYER") {
-      const canvas = document.querySelector('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
       let ancho = canvas.width;
       let alto = canvas.height;
       let anchoCelda = ancho / 3;
@@ -137,23 +124,39 @@ function App() {
 
       if (table[i][j] === "") {
         table[i][j] = "PLAYER";
-        drawGame(ctx, anchoCelda, altoCelda)
+        drawGame(ctx, anchoCelda, altoCelda);
+        verificadorGanador()
         setTurn("ROBOT");
-        Vefify(table)
+        
       }
     }
-  }
+  };
 
+  const verificadorGanador = () => {
+    let win = Vefify(table);
+      if (win != null) {
+        if (win === "ROBOT") {
+          setGano("Te gano la maquina!!!");
+        } else if (win === "PLAYER") {
+          setGano("Ganaste!!!");
+        } else {
+          setGano("EMPATE");
+        }
+        setTurn("NOTHING");
+  }}
+  
   return (
     <div>
-      <canvas 
-        style={{ background: "teal" }} 
-        width="400" 
-        height="400" 
+      <canvas
+        style={{ background: "teal" }}
+        width="400"
+        height="400"
         onClick={eventDrawTable}
       />
+      <br />
+      <span style={{ fontSize: 20 }}>{gano}</span>
     </div>
   );
 }
 
-export default App;
+export default App
