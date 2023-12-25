@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Vefify from "./Vefify";
+import Minimax from "./MInimax";
 
 let table = [
   ["", "", ""],
@@ -91,11 +92,18 @@ function App() {
 
   const eventTurnRobot = (ctx, anchoCelda, altoCelda) => {
     if (turn === "ROBOT") {
+      let mejorPuntaje = -Infinity;
       let mov = { i: -1, j: -1 };
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
           if (table[i][j] === "") {
-            mov = { i, j };
+            table[i][j] = 'ROBOT';
+            let puntaje = Minimax(table, 0, false);
+            table[i][j] = 'NOTHING';
+            if (puntaje > mejorPuntaje) {
+              mejorPuntaje = puntaje;
+              mov = { i, j };
+            }
           }
         }
       }
@@ -104,6 +112,7 @@ function App() {
         table[mov.i][mov.j] = "ROBOT";
         drawGame(ctx, anchoCelda, altoCelda);
         setTurn("PLAYER");
+        verificadorGanador();
       }
     }
   };
@@ -134,16 +143,42 @@ function App() {
 
   const verificadorGanador = () => {
     let win = Vefify(table);
-      if (win != null) {
-        if (win === "ROBOT") {
-          setGano("Te gano la maquina!!!");
-        } else if (win === "PLAYER") {
-          setGano("Ganaste!!!");
-        } else {
-          setGano("EMPATE");
-        }
+    if (win !== null) {
+      if (win === "ROBOT") {
+        setGano("Te gano la maquina!!!");
+      } else if (win === "PLAYER") {
+        setGano("Ganaste!!!");
+      } else {
+        setGano("EMPATE");
+      }
+      setTurn("NOTHING");
+    } else {
+      // Verificar empate solo si no hay ganadores y todas las celdas están llenas
+      let todasCeldasLlenas = table.every(row => row.every(cell => cell !== ''));
+      if (todasCeldasLlenas) {
+        setGano("EMPATE");
         setTurn("NOTHING");
-  }}
+      }
+    }
+  };
+
+  const eventReiniciarJuego = () => {
+    table = [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ];
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d');
+    let ancho = canvas.width
+    let alto = canvas.height
+    let anchoCelda = ancho / 3
+    let altoCelda = alto / 3
+    drawTable(ctx, ancho,alto,anchoCelda,altoCelda)
+    drawGame(ctx,anchoCelda,altoCelda)
+    setTurn("ROBOT")
+    setGano('');
+  }
   
   return (
     <div>
@@ -155,6 +190,8 @@ function App() {
       />
       <br />
       <span style={{ fontSize: 20 }}>{gano}</span>
+      <br />
+      <button onClick={eventReiniciarJuego}>Reiniciar</button>
     </div>
   );
 }
